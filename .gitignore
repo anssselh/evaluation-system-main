@@ -15,3 +15,15 @@ next.user-config.*
 node_modules/
 .next/
 .DS_Store
+
+# Windows reserved device name (phantom git entry)
+NUL
+
+# Secrets — never commit
+.env
+
+# Use yarn.lock only (not both lockfiles)
+package-lock.json
+
+# Course material / local files
+support de bolockchain.pdf
