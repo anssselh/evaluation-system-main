@@ -3,9 +3,13 @@ import mongoose, { Document, Schema, Types } from 'mongoose';
 export interface IReport extends Document {
   stageId: Types.ObjectId;
   studentId: Types.ObjectId;
-  supervisorId: Types.ObjectId;
+  companyId: Types.ObjectId;
+  supervisorId?: Types.ObjectId;
   title: string;
   content: string;
+  pdfFile?: string;
+  fileName?: string;
+  fileSize?: number;
   activitiesPerformed: string[];
   competenciesDeveloped: string[];
   challenges: string[];
@@ -30,10 +34,14 @@ const ReportSchema = new Schema<IReport>(
       ref: 'User',
       required: true,
     },
-    supervisorId: {
+    companyId: {
       type: Schema.Types.ObjectId,
       ref: 'User',
       required: true,
+    },
+    supervisorId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
     },
     title: {
       type: String,
@@ -42,7 +50,19 @@ const ReportSchema = new Schema<IReport>(
     },
     content: {
       type: String,
-      required: [true, 'Please provide report content'],
+      default: '',
+    },
+    pdfFile: {
+      type: String,
+      default: null,
+    },
+    fileName: {
+      type: String,
+      default: null,
+    },
+    fileSize: {
+      type: Number,
+      default: 0,
     },
     activitiesPerformed: [
       {

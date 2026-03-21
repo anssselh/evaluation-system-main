@@ -57,7 +57,8 @@ export default function DashboardLayout({
       : []),
     ...(user.role === 'company'
       ? [
-          { label: 'Active Stages', href: `/dashboard/${user.role}/stages` },
+          { label: 'Stages', href: `/dashboard/${user.role}/stages` },
+          { label: 'Reports', href: `/dashboard/${user.role}/reports` },
           { label: 'Certificates', href: `/dashboard/${user.role}/certificates` },
         ]
       : []),

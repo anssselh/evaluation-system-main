@@ -1,37 +1,37 @@
 import mongoose, { Document, Schema, Types } from 'mongoose';
 
 export interface IStage extends Document {
-  title: string;
-  description: string;
   studentId: Types.ObjectId;
   companyId: Types.ObjectId;
   supervisorId?: Types.ObjectId;
-  position: string;
-  department: string;
-  startDate: Date;
-  endDate: Date;
-  duration: number;
-  address: string;
-  phone: string;
-  email: string;
+  // Student Application Details (required for initial application)
+  studentName: string;
+  university: string;
+  studentEmail: string;
+  cvFile?: string;
+  cvFileName?: string;
+  cvFileSize?: number;
+  // Stage Details (filled after approval - optional initially)
+  title?: string;
+  description?: string;
+  position?: string;
+  department?: string;
+  startDate?: Date;
+  endDate?: Date;
+  duration?: number;
+  address?: string;
+  phone?: string;
+  email?: string;
   tasks: string[];
   achievements: string[];
-  status: 'in_progress' | 'completed' | 'cancelled';
+  status: 'pending' | 'approved' | 'rejected' | 'in_progress' | 'completed' | 'cancelled';
+  rejectionReason?: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
 const StageSchema = new Schema<IStage>(
   {
-    title: {
-      type: String,
-      required: [true, 'Please provide a stage title'],
-      trim: true,
-    },
-    description: {
-      type: String,
-      required: [true, 'Please provide a description'],
-    },
     studentId: {
       type: Schema.Types.ObjectId,
       ref: 'User',
@@ -46,21 +46,52 @@ const StageSchema = new Schema<IStage>(
       type: Schema.Types.ObjectId,
       ref: 'User',
     },
+    // Student Application Details (required)
+    studentName: {
+      type: String,
+      required: [true, 'Please provide student name'],
+      trim: true,
+    },
+    university: {
+      type: String,
+      required: [true, 'Please provide university name'],
+      trim: true,
+    },
+    studentEmail: {
+      type: String,
+      required: [true, 'Please provide student email'],
+      trim: true,
+    },
+    cvFile: {
+      type: String,
+      trim: true,
+    },
+    cvFileName: {
+      type: String,
+      trim: true,
+    },
+    cvFileSize: {
+      type: Number,
+    },
+    // Stage Details (optional - filled after approval)
+    title: {
+      type: String,
+      trim: true,
+    },
+    description: {
+      type: String,
+    },
     position: {
       type: String,
-      required: [true, 'Please provide a position'],
     },
     department: {
       type: String,
-      required: [true, 'Please provide a department'],
     },
     startDate: {
       type: Date,
-      required: [true, 'Please provide a start date'],
     },
     endDate: {
       type: Date,
-      required: [true, 'Please provide an end date'],
     },
     duration: {
       type: Number,
@@ -68,15 +99,12 @@ const StageSchema = new Schema<IStage>(
     },
     address: {
       type: String,
-      required: [true, 'Please provide an address'],
     },
     phone: {
       type: String,
-      required: [true, 'Please provide a phone number'],
     },
     email: {
       type: String,
-      required: [true, 'Please provide an email'],
     },
     tasks: [
       {
@@ -90,8 +118,12 @@ const StageSchema = new Schema<IStage>(
     ],
     status: {
       type: String,
-      enum: ['in_progress', 'completed', 'cancelled'],
-      default: 'in_progress',
+      enum: ['pending', 'approved', 'rejected', 'in_progress', 'completed', 'cancelled'],
+      default: 'pending',
+    },
+    rejectionReason: {
+      type: String,
+      default: null,
     },
   },
   {
@@ -99,14 +131,16 @@ const StageSchema = new Schema<IStage>(
   }
 );
 
-// Calculate duration before saving
+// Calculate duration before saving (only if dates are provided)
 StageSchema.pre('save', function (next) {
-  const startDate = new Date(this.startDate);
-  const endDate = new Date(this.endDate);
-  const durationInDays = Math.floor(
-    (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
-  );
-  this.duration = durationInDays;
+  if (this.startDate && this.endDate) {
+    const startDate = new Date(this.startDate);
+    const endDate = new Date(this.endDate);
+    const durationInDays = Math.floor(
+      (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+    );
+    this.duration = durationInDays;
+  }
   next();
 });
 

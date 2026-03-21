@@ -11,7 +11,7 @@ interface CompanyStats {
   activeStages: number;
   totalStudents: number;
   certificates: number;
-  pendingReviews: number;
+  pendingRequests: number;
 }
 
 export default function CompanyDashboard() {
@@ -19,7 +19,7 @@ export default function CompanyDashboard() {
     activeStages: 0,
     totalStudents: 0,
     certificates: 0,
-    pendingReviews: 0,
+    pendingRequests: 0,
   });
   const [recentStages, setRecentStages] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -52,14 +52,15 @@ export default function CompanyDashboard() {
 
       const certsData = certsRes.ok ? await certsRes.json() : [];
 
-      const activeStages = stagesData.filter((s: any) => s.status === 'in_progress').length;
+      const activeStages = stagesData.filter((s: any) => s.status === 'approved' || s.status === 'in_progress').length;
       const totalStudents = stagesData.length;
+      const pendingRequests = stagesData.filter((s: any) => s.status === 'pending').length;
 
       setStats({
         activeStages,
         totalStudents,
         certificates: certsData.length,
-        pendingReviews: 0,
+        pendingRequests,
       });
 
       setRecentStages(stagesData.slice(0, 3));
@@ -94,8 +95,8 @@ export default function CompanyDashboard() {
       bgColor: 'bg-amber-500/10',
     },
     {
-      title: 'Reports Generated',
-      value: stats.pendingReviews,
+      title: 'Pending Requests',
+      value: stats.pendingRequests,
       icon: FileText,
       color: 'text-purple-500',
       bgColor: 'bg-purple-500/10',

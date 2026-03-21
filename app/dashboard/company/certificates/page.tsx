@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Plus, CheckCircle, Clock } from 'lucide-react';
+import { Plus, CheckCircle, Clock, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Certificate {
@@ -119,6 +119,30 @@ export default function CompanyCertificatesPage() {
     } catch (error) {
       console.error('[v0] Generate certificate error:', error);
       toast.error('Failed to generate certificate');
+    }
+  };
+
+  const handleDelete = async (certId: string) => {
+    if (!confirm('Are you sure you want to delete this certificate? This action cannot be undone.')) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/certificates/${certId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        toast.error(error.error || 'Failed to delete certificate');
+        return;
+      }
+
+      toast.success('Certificate deleted successfully');
+      fetchData();
+    } catch (error) {
+      console.error('[v0] Delete certificate error:', error);
+      toast.error('Failed to delete certificate');
     }
   };
 
@@ -267,6 +291,17 @@ export default function CompanyCertificatesPage() {
                     </div>
                   )}
                 </div>
+
+                {/* Delete Button */}
+                <Button
+                  onClick={() => handleDelete(cert._id)}
+                  variant="outline"
+                  size="sm"
+                  className="w-full border-red-500/50 text-red-400 hover:bg-red-500/10"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete Certificate
+                </Button>
               </CardContent>
             </Card>
           ))

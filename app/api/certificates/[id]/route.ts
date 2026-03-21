@@ -117,8 +117,11 @@ export async function DELETE(
       );
     }
 
-    // Only company can delete
-    if (auth.user?.userId !== certificate.companyId.toString()) {
+    // Both student and company can delete
+    const isStudent = auth.user?.userId === certificate.studentId.toString();
+    const isCompany = auth.user?.userId === certificate.companyId.toString();
+
+    if (!isStudent && !isCompany) {
       return NextResponse.json(
         { error: 'Unauthorized to delete this certificate' },
         { status: 403 }

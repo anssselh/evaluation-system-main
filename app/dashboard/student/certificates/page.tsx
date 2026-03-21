@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download, CheckCircle, Clock } from 'lucide-react';
+import { Download, CheckCircle, Clock, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useCertificateDownload } from '@/hooks/use-certificate-download';
 
@@ -22,7 +22,7 @@ interface Certificate {
 export default function CertificatesPage() {
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { downloadCertificate } = useCertificateDownload();
+  const { downloadCertificate, isDownloading } = useCertificateDownload();
 
   useEffect(() => {
     fetchCertificates();
@@ -52,6 +52,30 @@ export default function CertificatesPage() {
 
   const handleDownload = (cert: Certificate) => {
     downloadCertificate(cert._id, cert.certificateNumber);
+  };
+
+  const handleDelete = async (certId: string) => {
+    if (!confirm('Are you sure you want to delete this certificate? This action cannot be undone.')) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/certificates/${certId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        toast.error(error.error || 'Failed to delete certificate');
+        return;
+      }
+
+      toast.success('Certificate deleted successfully');
+      fetchCertificates();
+    } catch (error) {
+      console.error('[v0] Delete certificate error:', error);
+      toast.error('Failed to delete certificate');
+    }
   };
 
   return (
@@ -166,14 +190,24 @@ export default function CertificatesPage() {
                   )}
                 </div>
 
-                {/* Download Button */}
-                <Button
-                  onClick={() => handleDownload(cert)}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  Download Certificate PDF
-                </Button>
+                {/* Action Buttons */}
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => handleDownload(cert)}
+                    disabled={isDownloading}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    {isDownloading ? 'Downloading...' : 'Download PDF'}
+                  </Button>
+                  <Button
+                    onClick={() => handleDelete(cert._id)}
+                    variant="outline"
+                    className="border-red-500/50 text-red-400 hover:bg-red-500/10"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ))

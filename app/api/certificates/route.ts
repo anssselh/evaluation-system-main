@@ -76,7 +76,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify stage exists and company owns it
-    const stage = await Stage.findById(validationResult.data.stageId);
+    const stage = await Stage.findById(validationResult.data.stageId)
+      .populate('studentId', 'name email')
+      .populate('companyId', 'name companyName');
+
     if (!stage) {
       return NextResponse.json(
         { error: 'Stage not found' },
@@ -84,7 +87,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (stage.companyId.toString() !== auth.user?.userId) {
+    if (stage.companyId._id.toString() !== auth.user?.userId) {
       return NextResponse.json(
         { error: 'Unauthorized to generate certificate for this stage' },
         { status: 403 }
@@ -103,15 +106,20 @@ export async function POST(request: NextRequest) {
     // Generate unique certificate number
     const certificateNumber = `CERT-${Date.now()}-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
 
+    // Generate blockchain hash with student name and timestamp
+    const hashInput = `${certificateNumber}${stage.studentId.name}${Date.now()}`;
+    const blockchainHash = crypto.createHash('sha256').update(hashInput).digest('hex');
+
     // Create certificate data
     const certificateData = {
       ...validationResult.data,
-      studentId: stage.studentId,
+      studentId: stage.studentId._id,
       companyId: auth.user.userId,
       stageId: validationResult.data.stageId,
       certificateNumber,
       certificateUrl: '',
-      blockchainHash: crypto.createHash('sha256').update(certificateNumber).digest('hex'),
+      blockchainHash,
+      blockchainStatus: 'confirmed', // Set as confirmed immediately
     };
 
     const certificate = await Certificate.create(certificateData);

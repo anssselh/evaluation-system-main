@@ -23,6 +23,8 @@ export async function GET(request: NextRequest) {
       query.studentId = userId;
     } else if (role === 'supervisor') {
       query.supervisorId = userId;
+    } else if (role === 'company') {
+      query.companyId = userId;
     }
 
     const status = searchParams.get('status');
@@ -33,6 +35,7 @@ export async function GET(request: NextRequest) {
     const reports = await Report.find(query)
       .populate('stageId', 'title position department')
       .populate('studentId', 'name email')
+      .populate('companyId', 'name companyName')
       .populate('supervisorId', 'name email')
       .sort({ createdAt: -1 });
 
@@ -73,7 +76,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify stage exists and belongs to student
-    const stage = await Stage.findById(validationResult.data.stageId);
+    const stage = await Stage.findById(validationResult.data.stageId)
+      .populate('companyId', '_id');
+
     if (!stage) {
       return NextResponse.json(
         { error: 'Stage not found' },
@@ -88,10 +93,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if stage is approved or completed
+    if (stage.status !== 'approved' && stage.status !== 'in_progress' && stage.status !== 'completed') {
+      return NextResponse.json(
+        {
+          error: `Cannot create report for stage with status: ${stage.status}. The internship must be approved by the company first.`,
+        },
+        { status: 400 }
+      );
+    }
+
     const reportData = {
       ...validationResult.data,
       studentId: auth.user.userId,
-      supervisorId: stage.supervisorId,
+      companyId: stage.companyId._id,
+      supervisorId: stage.supervisorId || null,
       stageId: validationResult.data.stageId,
     };
 

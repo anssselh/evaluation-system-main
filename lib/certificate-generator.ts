@@ -65,20 +65,20 @@ export function generateCertificateHTML(data: CertificateData): string {
             background: #f0f0f0;
             padding: 20px;
         }
-        
+
         .certificate {
             width: 100%;
             max-width: 900px;
             height: 600px;
             margin: 0 auto;
-            background: linear-gradient(135deg, #ffffff 0%, #f9f9f9 100%);
-            border: 3px solid #1e293b;
+            background: #ffffff;
+            border: 3px solid #2d3748;
             padding: 50px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
             position: relative;
             overflow: hidden;
         }
-        
+
         .certificate::before {
             content: '';
             position: absolute;
@@ -86,7 +86,7 @@ export function generateCertificateHTML(data: CertificateData): string {
             left: 0;
             right: 0;
             height: 8px;
-            background: linear-gradient(90deg, #3b82f6, #06b6d4);
+            background: #3b82f6;
         }
         
         .header {
@@ -98,26 +98,26 @@ export function generateCertificateHTML(data: CertificateData): string {
             width: 60px;
             height: 60px;
             margin: 0 auto 20px;
-            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            background: #3b82f6;
             border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
+            color: #ffffff;
             font-size: 32px;
             font-weight: bold;
         }
         
         h1 {
             font-size: 48px;
-            color: #1e293b;
+            color: #2d3748;
             margin-bottom: 10px;
             font-weight: 700;
         }
-        
+
         .subtitle {
             font-size: 16px;
-            color: #64748b;
+            color: #718096;
             margin-bottom: 20px;
         }
         
@@ -132,23 +132,23 @@ export function generateCertificateHTML(data: CertificateData): string {
             border-bottom: 1px solid #e2e8f0;
             padding: 20px 0;
         }
-        
+
         .student-name {
             font-size: 32px;
-            color: #1e293b;
+            color: #2d3748;
             font-weight: 700;
             margin-bottom: 10px;
         }
-        
+
         .position-company {
             font-size: 18px;
-            color: #475569;
+            color: #4a5568;
             margin-bottom: 5px;
         }
-        
+
         .company {
             font-size: 16px;
-            color: #64748b;
+            color: #718096;
         }
         
         .details-grid {
@@ -160,17 +160,17 @@ export function generateCertificateHTML(data: CertificateData): string {
         
         .detail-section h3 {
             font-size: 14px;
-            color: #1e293b;
+            color: #2d3748;
             font-weight: 600;
             margin-bottom: 10px;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-        
+
         .detail-section ul {
             list-style: none;
             font-size: 13px;
-            color: #475569;
+            color: #4a5568;
             line-height: 1.8;
         }
         
@@ -194,37 +194,37 @@ export function generateCertificateHTML(data: CertificateData): string {
             gap: 20px;
             margin-top: 40px;
             font-size: 12px;
-            color: #64748b;
+            color: #718096;
             text-align: center;
         }
-        
+
         .footer-item {
-            border-top: 1px solid #1e293b;
+            border-top: 1px solid #2d3748;
             padding-top: 10px;
         }
-        
+
         .date-info {
             font-size: 12px;
-            color: #64748b;
+            color: #718096;
             margin-top: 20px;
             text-align: center;
         }
-        
+
         .expiry {
             margin-top: 5px;
-            color: #f97316;
+            color: #dd6b20;
             font-weight: 600;
         }
-        
+
         .blockchain-info {
             font-size: 10px;
-            color: #94a3b8;
+            color: #a0aec0;
             word-break: break-all;
             margin-top: 10px;
             padding: 10px;
-            background: #f1f5f9;
+            background: #f7fafc;
             border-radius: 4px;
-            border-left: 3px solid #06b6d4;
+            border-left: 3px solid #3b82f6;
         }
         
         @media print {
@@ -250,7 +250,7 @@ export function generateCertificateHTML(data: CertificateData): string {
         <div class="student-info">
             <p class="student-name">${data.studentName}</p>
             <p class="position-company">for completing an internship as</p>
-            <p class="position-company" style="font-weight: 600; color: #1e293b;">${data.position}</p>
+            <p class="position-company" style="font-weight: 600; color: #2d3748;">${data.position}</p>
             <p class="company">at ${data.companyName}</p>
         </div>
         

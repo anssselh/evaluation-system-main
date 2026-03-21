@@ -52,10 +52,14 @@ export async function POST(request: NextRequest) {
     const auth = await requireAuth(request);
     if (!auth.isValid) return auth.response!;
 
+    console.log('[DEBUG] User role:', auth.user?.role);
+    console.log('[DEBUG] User ID:', auth.user?.userId);
+
     // Only students can create stages
     if (auth.user?.role !== 'student') {
+      console.log('[ERROR] User is not a student, role:', auth.user?.role);
       return NextResponse.json(
-        { error: 'Only students can create stages' },
+        { error: `Only students can create stages. Your role is: ${auth.user?.role}` },
         { status: 403 }
       );
     }
@@ -63,11 +67,12 @@ export async function POST(request: NextRequest) {
     await connectDB();
 
     const body = await request.json();
+    console.log('[DEBUG] Request body:', body);
 
     // Validate input
     const validationResult = CreateStageSchema.safeParse(body);
     if (!validationResult.success) {
-      console.log('VALIDATION ERROR:', validationResult.error.errors);
+      console.log('[ERROR] Validation failed:', validationResult.error.errors);
 
       return NextResponse.json(
         { error: 'Validation failed', details: validationResult.error.errors },
@@ -82,7 +87,11 @@ export async function POST(request: NextRequest) {
       endDate: new Date(validationResult.data.endDate),
     };
 
+    console.log('[DEBUG] Creating stage with data:', stageData);
+
     const stage = await Stage.create(stageData);
+
+    console.log('[SUCCESS] Stage created:', stage._id);
 
     return NextResponse.json(
       {
@@ -92,7 +101,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error: any) {
-    console.error('[v0] Create stage error:', error);
+    console.error('[ERROR] Create stage error:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to create stage' },
       { status: 500 }
