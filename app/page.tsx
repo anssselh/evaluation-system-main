@@ -257,7 +257,6 @@ export default function AuthPage() {
                   <SelectContent>
                     <SelectItem value="student">Student</SelectItem>
                     <SelectItem value="company">Company</SelectItem>
-                    <SelectItem value="supervisor">Supervisor</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

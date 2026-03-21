@@ -53,12 +53,21 @@ export async function GET(
       blockchainHash: certificate.blockchainHash,
     });
 
-    // Return HTML for client-side PDF generation
+    // Return HTML + real blockchain data for client-side PDF generation and UI display
     return NextResponse.json(
       {
-        html: certificateHTML,
+        html:              certificateHTML,
         certificateNumber: certificate.certificateNumber,
-        studentName: certificate.studentId.name,
+        studentName:       certificate.studentId.name,
+        blockchain: {
+          txHash:          certificate.txHash          ?? null,
+          blockNumber:     certificate.blockNumber      ?? null,
+          contractAddress: certificate.contractAddress  ?? null,
+          gasUsed:         certificate.gasUsed          ?? null,
+          walletAddress:   certificate.walletAddress    ?? null,
+          status:          certificate.blockchainStatus,
+          network:         'Ganache Local (http://127.0.0.1:7545)',
+        },
       },
       { status: 200 }
     );

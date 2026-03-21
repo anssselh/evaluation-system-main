@@ -107,7 +107,6 @@ export async function POST(request: NextRequest) {
       title,
       studentId: auth.user.userId,
       companyId: stage.companyId._id,
-      supervisorId: stage.supervisorId || null,
       pdfFile: `/uploads/reports/${fileName}`,
       fileName: file.name,
       fileSize: file.size,

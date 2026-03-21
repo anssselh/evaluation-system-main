@@ -22,8 +22,6 @@ export async function GET(request: NextRequest) {
       query.studentId = userId;
     } else if (role === 'company') {
       query.companyId = userId;
-    } else if (role === 'supervisor') {
-      query.supervisorId = userId;
     }
 
     const status = searchParams.get('status');
@@ -34,7 +32,6 @@ export async function GET(request: NextRequest) {
     const stages = await Stage.find(query)
       .populate('studentId', 'name email')
       .populate('companyId', 'name companyName')
-      .populate('supervisorId', 'name email')
       .sort({ createdAt: -1 });
 
     return NextResponse.json(stages, { status: 200 });

@@ -1,7 +1,7 @@
 import mongoose, { Document, Schema } from 'mongoose';
 import bcryptjs from 'bcryptjs';
 
-export type UserRole = 'student' | 'company' | 'supervisor';
+export type UserRole = 'student' | 'company';
 
 export interface IUser extends Document {
   name: string;
@@ -44,7 +44,7 @@ const UserSchema = new Schema<IUser>(
     },
     role: {
       type: String,
-      enum: ['student', 'company', 'supervisor'],
+      enum: ['student', 'company'],
       required: [true, 'Please provide a role'],
     },
     profilePicture: {

@@ -4,7 +4,6 @@ export interface IReport extends Document {
   stageId: Types.ObjectId;
   studentId: Types.ObjectId;
   companyId: Types.ObjectId;
-  supervisorId?: Types.ObjectId;
   title: string;
   content: string;
   pdfFile?: string;
@@ -38,10 +37,6 @@ const ReportSchema = new Schema<IReport>(
       type: Schema.Types.ObjectId,
       ref: 'User',
       required: true,
-    },
-    supervisorId: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
     },
     title: {
       type: String,

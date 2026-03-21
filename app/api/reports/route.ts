@@ -21,8 +21,6 @@ export async function GET(request: NextRequest) {
     // Filter by role
     if (role === 'student') {
       query.studentId = userId;
-    } else if (role === 'supervisor') {
-      query.supervisorId = userId;
     } else if (role === 'company') {
       query.companyId = userId;
     }
@@ -36,7 +34,6 @@ export async function GET(request: NextRequest) {
       .populate('stageId', 'title position department')
       .populate('studentId', 'name email')
       .populate('companyId', 'name companyName')
-      .populate('supervisorId', 'name email')
       .sort({ createdAt: -1 });
 
     return NextResponse.json(reports, { status: 200 });
@@ -107,7 +104,6 @@ export async function POST(request: NextRequest) {
       ...validationResult.data,
       studentId: auth.user.userId,
       companyId: stage.companyId._id,
-      supervisorId: stage.supervisorId || null,
       stageId: validationResult.data.stageId,
     };
 

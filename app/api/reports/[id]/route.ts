@@ -17,8 +17,7 @@ export async function GET(
     const { id } = await params;
     const report = await Report.findById(id)
       .populate('stageId', 'title position department')
-      .populate('studentId', 'name email')
-      .populate('supervisorId', 'name email');
+      .populate('studentId', 'name email');
 
     if (!report) {
       return NextResponse.json(
@@ -57,18 +56,10 @@ export async function PUT(
       );
     }
 
-    // Check authorization - only the student who created it can edit
-    if (auth.user?.userId !== report.studentId.toString()) {
-      return NextResponse.json(
-        { error: 'Unauthorized to update this report' },
-        { status: 403 }
-      );
-    }
-
     const body = await request.json();
 
-    // Allow supervisor to review the report
-    if (auth.user?.userId === report.supervisorId.toString()) {
+    // Allow company to review the report
+    if (auth.user?.userId === report.companyId.toString()) {
       const validationResult = ReviewReportSchema.safeParse(body);
       if (!validationResult.success) {
         return NextResponse.json(
@@ -88,6 +79,14 @@ export async function PUT(
           report,
         },
         { status: 200 }
+      );
+    }
+
+    // Check authorization - only the student who created it can edit
+    if (auth.user?.userId !== report.studentId.toString()) {
+      return NextResponse.json(
+        { error: 'Unauthorized to update this report' },
+        { status: 403 }
       );
     }
 

@@ -64,8 +64,7 @@ export async function PATCH(
 
     const updatedStage = await Stage.findById(id)
       .populate('studentId', 'name email phone')
-      .populate('companyId', 'name companyName')
-      .populate('supervisorId', 'name email');
+      .populate('companyId', 'name companyName');
 
     return NextResponse.json(
       {

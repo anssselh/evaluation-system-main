@@ -6,6 +6,8 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-}
+  // Required for Next.js 16 (Turbopack is default)
+  turbopack: {},
+};
 
-export default nextConfig
+export default nextConfig;

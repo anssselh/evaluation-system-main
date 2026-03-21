@@ -11,10 +11,9 @@ export async function PATCH(
     const auth = await requireAuth(request);
     if (!auth.isValid) return auth.response!;
 
-    // Only students can start their stages
-    if (auth.user?.role !== 'student') {
+    if (auth.user?.role !== 'company') {
       return NextResponse.json(
-        { error: 'Only students can start their stages' },
+        { error: 'Only companies can mark a stage as completed' },
         { status: 403 }
       );
     }
@@ -25,47 +24,38 @@ export async function PATCH(
     const stage = await Stage.findById(id);
 
     if (!stage) {
-      return NextResponse.json(
-        { error: 'Stage not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Stage not found' }, { status: 404 });
     }
 
-    // Check if the student owns this stage
-    if (auth.user?.userId !== stage.studentId.toString()) {
+    if (stage.companyId.toString() !== auth.user.userId) {
       return NextResponse.json(
-        { error: 'Unauthorized to start this stage' },
+        { error: 'Unauthorized to complete this stage' },
         { status: 403 }
       );
     }
 
-    // Check if stage is approved
-    if (stage.status !== 'approved') {
+    if (stage.status !== 'in_progress') {
       return NextResponse.json(
-        { error: `Cannot start stage with status: ${stage.status}. The stage must be approved by the company first.` },
+        { error: `Cannot complete a stage with status: ${stage.status}. Stage must be in progress.` },
         { status: 400 }
       );
     }
 
-    // Start the stage
-    stage.status = 'in_progress';
+    stage.status = 'completed';
     await stage.save();
 
     const updatedStage = await Stage.findById(id)
-      .populate('studentId', 'name email phone')
+      .populate('studentId', 'name email')
       .populate('companyId', 'name companyName');
 
     return NextResponse.json(
-      {
-        message: 'Stage started successfully',
-        stage: updatedStage,
-      },
+      { message: 'Stage marked as completed successfully', stage: updatedStage },
       { status: 200 }
     );
   } catch (error: any) {
-    console.error('[v0] Start stage error:', error);
+    console.error('[v0] Complete stage error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to start stage' },
+      { error: error.message || 'Failed to complete stage' },
       { status: 500 }
     );
   }

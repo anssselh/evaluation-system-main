@@ -3,7 +3,6 @@ import mongoose, { Document, Schema, Types } from 'mongoose';
 export interface IStage extends Document {
   studentId: Types.ObjectId;
   companyId: Types.ObjectId;
-  supervisorId?: Types.ObjectId;
   // Student Application Details (required for initial application)
   studentName: string;
   university: string;
@@ -41,10 +40,6 @@ const StageSchema = new Schema<IStage>(
       type: Schema.Types.ObjectId,
       ref: 'User',
       required: true,
-    },
-    supervisorId: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
     },
     // Student Application Details (required)
     studentName: {

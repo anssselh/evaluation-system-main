@@ -190,38 +190,52 @@ export default function StudentDashboard() {
             </div>
           ) : (
             <div className="space-y-4">
-              {recentStages.map((stage) => (
-                <div
-                  key={stage._id}
-                  className="p-4 bg-slate-900/50 rounded-lg border border-slate-700 hover:border-slate-600 transition-colors cursor-pointer"
-                  onClick={() => router.push(`/dashboard/student/stages`)}
-                >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-white font-medium">{stage.title}</h3>
-                      <p className="text-sm text-slate-400">{stage.position}</p>
-                    </div>
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        stage.status === 'in_progress'
-                          ? 'bg-green-500/20 text-green-400'
-                          : stage.status === 'completed'
-                          ? 'bg-blue-500/20 text-blue-400'
-                          : 'bg-red-500/20 text-red-400'
-                      }`}
+              {recentStages.map((stage: any) => {
+                  const title    = stage.title || stage.position || `${stage.companyId?.companyName || stage.companyId?.name || 'Company'}'s Internship`;
+                  const subtitle = stage.position || stage.university || '';
+                  const company  = stage.companyId?.companyName || stage.companyId?.name || '';
+                  const duration = stage.duration > 0 ? `${stage.duration} days` : 'Dates not set';
+
+                  const statusStyles: Record<string, string> = {
+                    pending:     'bg-yellow-500/20 text-yellow-400',
+                    approved:    'bg-blue-500/20 text-blue-400',
+                    in_progress: 'bg-green-500/20 text-green-400',
+                    completed:   'bg-slate-500/20 text-slate-300',
+                    rejected:    'bg-red-500/20 text-red-400',
+                    cancelled:   'bg-red-500/20 text-red-400',
+                  };
+                  const statusLabel: Record<string, string> = {
+                    pending:     'Pending',
+                    approved:    'Approved',
+                    in_progress: 'In Progress',
+                    completed:   'Completed',
+                    rejected:    'Rejected',
+                    cancelled:   'Cancelled',
+                  };
+
+                  return (
+                    <div
+                      key={stage._id}
+                      className="p-4 bg-slate-900/50 rounded-lg border border-slate-700 hover:border-slate-600 transition-colors cursor-pointer"
+                      onClick={() => router.push('/dashboard/student/stages')}
                     >
-                      {stage.status === 'in_progress'
-                        ? 'In Progress'
-                        : stage.status === 'completed'
-                        ? 'Completed'
-                        : 'Cancelled'}
-                    </span>
-                  </div>
-                  <div className="mt-3 flex gap-4 text-sm text-slate-400">
-                    <span>Duration: {stage.duration} days</span>
-                  </div>
-                </div>
-              ))}
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="text-white font-medium">{title}</h3>
+                          <p className="text-sm text-slate-400">
+                            {company}{subtitle && company ? ` • ${subtitle}` : subtitle}
+                          </p>
+                        </div>
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusStyles[stage.status] || 'bg-slate-500/20 text-slate-400'}`}>
+                          {statusLabel[stage.status] || stage.status}
+                        </span>
+                      </div>
+                      <div className="mt-3 flex gap-4 text-sm text-slate-400">
+                        <span>Duration: {duration}</span>
+                      </div>
+                    </div>
+                  );
+                })}
             </div>
           )}
         </CardContent>

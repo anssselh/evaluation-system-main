@@ -17,8 +17,7 @@ export async function GET(
     const { id } = await params;
     const stage = await Stage.findById(id)
       .populate('studentId', 'name email phone address')
-      .populate('companyId', 'name companyName email phone')
-      .populate('supervisorId', 'name email');
+      .populate('companyId', 'name companyName email phone');
 
     if (!stage) {
       return NextResponse.json(
@@ -57,11 +56,8 @@ export async function PUT(
       );
     }
 
-    // Check authorization - student or supervisor can update
-    if (
-      auth.user?.userId !== stage.studentId.toString() &&
-      auth.user?.userId !== stage.supervisorId?.toString()
-    ) {
+    // Check authorization - only student can update
+    if (auth.user?.userId !== stage.studentId.toString()) {
       return NextResponse.json(
         { error: 'Unauthorized to update this stage' },
         { status: 403 }

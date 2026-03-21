@@ -5,6 +5,7 @@ import Stage from '@/models/Stage';
 import { requireAuth } from '@/lib/auth-middleware';
 import { GenerateCertificateSchema } from '@/lib/validation';
 import crypto from 'crypto';
+import { registerCertificateOnChain } from '@/lib/blockchain';
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,12 +15,11 @@ export async function GET(request: NextRequest) {
     await connectDB();
 
     const { searchParams } = new URL(request.url);
-    const role = auth.user?.role;
+    const role   = auth.user?.role;
     const userId = auth.user?.userId;
 
     let query: any = {};
 
-    // Filter by role
     if (role === 'student') {
       query.studentId = userId;
     } else if (role === 'company') {
@@ -52,7 +52,6 @@ export async function POST(request: NextRequest) {
     const auth = await requireAuth(request);
     if (!auth.isValid) return auth.response!;
 
-    // Only company can generate certificates
     if (auth.user?.role !== 'company') {
       return NextResponse.json(
         { error: 'Only companies can generate certificates' },
@@ -63,9 +62,8 @@ export async function POST(request: NextRequest) {
     await connectDB();
 
     const body = await request.json();
-
-    // Validate input
     console.log('POST /api/certificates body:', body);
+
     const validationResult = GenerateCertificateSchema.safeParse(body);
     if (!validationResult.success) {
       console.log('Validation errors:', validationResult.error.errors);
@@ -75,16 +73,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify stage exists and company owns it
+    // Verify stage exists and belongs to this company
     const stage = await Stage.findById(validationResult.data.stageId)
       .populate('studentId', 'name email')
       .populate('companyId', 'name companyName');
 
     if (!stage) {
-      return NextResponse.json(
-        { error: 'Stage not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Stage not found' }, { status: 404 });
     }
 
     if (stage.companyId._id.toString() !== auth.user?.userId) {
@@ -94,7 +89,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if certificate already exists
     const existingCert = await Certificate.findOne({ stageId: validationResult.data.stageId });
     if (existingCert) {
       return NextResponse.json(
@@ -104,31 +98,53 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate unique certificate number
-    const certificateNumber = `CERT-${Date.now()}-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
+    const certificateNumber = `CERT-${Date.now()}-${crypto
+      .randomBytes(4)
+      .toString('hex')
+      .toUpperCase()}`;
 
-    // Generate blockchain hash with student name and timestamp
-    const hashInput = `${certificateNumber}${stage.studentId.name}${Date.now()}`;
-    const blockchainHash = crypto.createHash('sha256').update(hashInput).digest('hex');
+    // ── Real Blockchain Registration (Ganache) ────────────────────────────────
+    let blockchainReceipt = null;
+    let blockchainStatus: 'confirmed' | 'failed' = 'failed';
 
-    // Create certificate data
+    try {
+      blockchainReceipt = await registerCertificateOnChain(
+        certificateNumber,
+        stage.studentId.name,
+        stage.companyId.companyName || stage.companyId.name,
+        stage.position || 'Intern'
+      );
+      blockchainStatus = 'confirmed';
+      console.log('[blockchain] Certificate registered on Ganache:', blockchainReceipt.txHash);
+    } catch (blockchainError: any) {
+      console.error('[blockchain] Failed to register on chain:', blockchainError.message);
+      // Graceful degradation: certificate is still created in MongoDB
+      // blockchainStatus stays 'failed' — UI will show a warning
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
     const certificateData = {
       ...validationResult.data,
-      studentId: stage.studentId._id,
-      companyId: auth.user.userId,
-      stageId: validationResult.data.stageId,
+      studentId:       stage.studentId._id,
+      companyId:       auth.user.userId,
+      stageId:         validationResult.data.stageId,
       certificateNumber,
-      certificateUrl: '',
-      blockchainHash,
-      blockchainStatus: 'confirmed', // Set as confirmed immediately
+      certificateUrl:  '',
+      // Set blockchainHash to txHash for UI backward-compatibility
+      blockchainHash:  blockchainReceipt?.txHash ?? null,
+      // Real Ethereum fields
+      txHash:          blockchainReceipt?.txHash          ?? null,
+      blockNumber:     blockchainReceipt?.blockNumber      ?? null,
+      contractAddress: blockchainReceipt?.contractAddress  ?? null,
+      gasUsed:         blockchainReceipt?.gasUsed          ?? null,
+      walletAddress:   blockchainReceipt?.walletAddress    ?? null,
+      blockchainStatus,
     };
 
     const certificate = await Certificate.create(certificateData);
 
     return NextResponse.json(
-      {
-        message: 'Certificate generated successfully',
-        certificate,
-      },
+      { message: 'Certificate generated successfully', certificate },
       { status: 201 }
     );
   } catch (error: any) {

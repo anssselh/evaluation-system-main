@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { FileText, CheckCircle, XCircle, Clock, Download, User, Building2, Mail } from 'lucide-react';
+import { FileText, CheckCircle, XCircle, Clock, Download, User, Building2, Mail, Flag } from 'lucide-react';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -89,6 +89,31 @@ export default function CompanyStagesPage() {
     } catch (error) {
       console.error('[v0] Approve error:', error);
       toast.error('Failed to approve stage');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleComplete = async (stageId: string) => {
+    setActionLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/stages/${stageId}/complete`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        toast.error(error.error || 'Failed to complete stage');
+        return;
+      }
+
+      toast.success('Internship marked as completed');
+      fetchStages();
+    } catch (error) {
+      console.error('[v0] Complete error:', error);
+      toast.error('Failed to complete stage');
     } finally {
       setActionLoading(false);
     }
@@ -251,6 +276,18 @@ export default function CompanyStagesPage() {
               Reject
             </Button>
           </div>
+        )}
+
+        {stage.status === 'in_progress' && (
+          <Button
+            size="sm"
+            onClick={() => handleComplete(stage._id)}
+            disabled={actionLoading}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white mt-2"
+          >
+            <Flag className="w-3 h-3 mr-1" />
+            {actionLoading ? 'Completing...' : 'Mark as Complete'}
+          </Button>
         )}
       </CardContent>
     </Card>

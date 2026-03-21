@@ -140,11 +140,11 @@ export default function CompanyDashboard() {
         ))}
       </div>
 
-      {/* Active Internships */}
+      {/* Recent Stages */}
       <Card className="bg-slate-800/50 border-slate-700">
         <CardHeader className="flex flex-row items-center justify-between pb-4">
           <div>
-            <CardTitle className="text-white">Active Internships</CardTitle>
+            <CardTitle className="text-white">Recent Internships</CardTitle>
             <CardDescription className="text-slate-400">
               Students currently in your programs
             </CardDescription>
@@ -161,32 +161,56 @@ export default function CompanyDashboard() {
             <div className="text-slate-400">Loading...</div>
           ) : recentStages.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-slate-400">No active internships</p>
+              <p className="text-slate-400">No internships yet</p>
             </div>
           ) : (
             <div className="space-y-4">
-              {recentStages.map((stage) => (
-                <div
-                  key={stage._id}
-                  className="p-4 bg-slate-900/50 rounded-lg border border-slate-700 hover:border-slate-600 transition-colors"
-                >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-white font-medium">{stage.title}</h3>
-                      <p className="text-sm text-slate-400">
-                        {stage.studentId?.name} • {stage.position}
-                      </p>
+              {recentStages.map((stage) => {
+                const studentName = stage.studentName || stage.studentId?.name || 'Unknown Student';
+                const title       = stage.title || stage.position || `${studentName}'s Internship`;
+                const dept        = stage.department || stage.university || '—';
+                const duration    = stage.duration > 0 ? `${stage.duration} days` : 'Dates not set';
+
+                const statusStyles: Record<string, string> = {
+                  pending:     'bg-yellow-500/20 text-yellow-400',
+                  approved:    'bg-blue-500/20 text-blue-400',
+                  in_progress: 'bg-green-500/20 text-green-400',
+                  completed:   'bg-slate-500/20 text-slate-400',
+                  rejected:    'bg-red-500/20 text-red-400',
+                  cancelled:   'bg-red-500/20 text-red-400',
+                };
+                const statusLabel: Record<string, string> = {
+                  pending:     'Pending',
+                  approved:    'Approved',
+                  in_progress: 'In Progress',
+                  completed:   'Completed',
+                  rejected:    'Rejected',
+                  cancelled:   'Cancelled',
+                };
+
+                return (
+                  <div
+                    key={stage._id}
+                    className="p-4 bg-slate-900/50 rounded-lg border border-slate-700 hover:border-slate-600 transition-colors"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="text-white font-medium">{title}</h3>
+                        <p className="text-sm text-slate-400">
+                          {studentName}{stage.position ? ` • ${stage.position}` : ''}
+                        </p>
+                      </div>
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusStyles[stage.status] || 'bg-slate-500/20 text-slate-400'}`}>
+                        {statusLabel[stage.status] || stage.status}
+                      </span>
                     </div>
-                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-400">
-                      Active
-                    </span>
+                    <div className="mt-3 flex gap-4 text-sm text-slate-400">
+                      <span>Duration: {duration}</span>
+                      <span>Dept: {dept}</span>
+                    </div>
                   </div>
-                  <div className="mt-3 flex gap-4 text-sm text-slate-400">
-                    <span>Duration: {stage.duration} days</span>
-                    <span>Dept: {stage.department}</span>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </CardContent>
