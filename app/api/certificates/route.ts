@@ -65,8 +65,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     // Validate input
+    console.log('POST /api/certificates body:', body);
     const validationResult = GenerateCertificateSchema.safeParse(body);
     if (!validationResult.success) {
+      console.log('Validation errors:', validationResult.error.errors);
       return NextResponse.json(
         { error: 'Validation failed', details: validationResult.error.errors },
         { status: 400 }

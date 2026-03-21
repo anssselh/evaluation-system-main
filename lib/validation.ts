@@ -58,7 +58,12 @@ export const GenerateCertificateSchema = z.object({
   stageId: z.string().min(1, 'Stage ID is required'),
   competencies: z.array(z.string()),
   achievements: z.array(z.string()),
-  expiryDate: z.string().datetime().optional(),
+  expiryDate: z
+  .string()
+  .optional()
+  .refine(val => !val || !val.trim() || z.string().datetime().safeParse(val).success, {
+    message: 'Invalid datetime',
+  }),
 });
 
 export type RegisterData = z.infer<typeof RegisterSchema>;
