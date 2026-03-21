@@ -29,25 +29,31 @@ interface Stage {
   status: string;
 }
 
+
 export default function StudentStagesPage() {
   const [stages, setStages] = useState<Stage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [companies, setCompanies] = useState([]);
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    position: '',
-    department: '',
-    startDate: '',
-    endDate: '',
-    address: '',
-    phone: '',
-    email: '',
-  });
+  title: '',
+  description: '',
+  position: '',
+  department: '',
+  startDate: '',
+  endDate: '',
+  address: '',
+  phone: '',
+  email: '',
+  companyId: '', 
+});
 
   useEffect(() => {
     fetchStages();
+    fetchCompanies(); // ✅ NEW
+
   }, []);
+
 
   const fetchStages = async () => {
     try {
@@ -70,6 +76,23 @@ export default function StudentStagesPage() {
       setIsLoading(false);
     }
   };
+  const fetchCompanies = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    const res = await fetch('/api/users?role=company', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const data = await res.json();
+
+    console.log('COMPANIES RESPONSE:', data); // ✅ ADD THIS
+
+    setCompanies(data);
+  } catch (err) {
+    console.error('Failed to fetch companies', err);
+  }
+};
+  
 
   const handleCreateStage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,6 +129,7 @@ export default function StudentStagesPage() {
         address: '',
         phone: '',
         email: '',
+        companyId: '',
       });
       setIsDialogOpen(false);
       fetchStages();
@@ -202,7 +226,26 @@ export default function StudentStagesPage() {
                   required
                 />
               </div>
+              <div className="space-y-2">
+                <Label className="text-slate-300">Company</Label>
+                
+                <select
+                  value={formData.companyId}
+                  onChange={(e) =>
+                    setFormData({ ...formData, companyId: e.target.value })
+                  }
+                  className="bg-slate-700 border-slate-600 text-white border rounded px-3 py-2 w-full text-sm"
+                  // required
+                >
+                  <option value="">Select company</option>
 
+                  {companies.map((company: any) => (
+                    <option key={company._id} value={company._id}>
+                      {company.companyName || company.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="text-slate-300">Department</Label>

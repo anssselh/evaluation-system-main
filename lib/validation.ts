@@ -22,10 +22,11 @@ export const LoginSchema = z.object({
 export const CreateStageSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
+  companyId: z.string().min(1, 'Company is required'),
   position: z.string().min(2, 'Position must be at least 2 characters'),
   department: z.string().min(2, 'Department must be at least 2 characters'),
-  startDate: z.string().datetime(),
-  endDate: z.string().datetime(),
+  startDate:  z.string(),
+  endDate: z.string(),
   address: z.string().min(5, 'Address is required'),
   phone: z.string().min(10, 'Valid phone number is required'),
   email: z.string().email('Valid email is required'),

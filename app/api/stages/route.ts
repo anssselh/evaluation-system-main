@@ -67,6 +67,8 @@ export async function POST(request: NextRequest) {
     // Validate input
     const validationResult = CreateStageSchema.safeParse(body);
     if (!validationResult.success) {
+      console.log('VALIDATION ERROR:', validationResult.error.errors);
+
       return NextResponse.json(
         { error: 'Validation failed', details: validationResult.error.errors },
         { status: 400 }
