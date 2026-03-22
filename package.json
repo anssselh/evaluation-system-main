@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "ganache": "npx ganache --port 7545 --deterministic",
+    "blockchain:deploy": "truffle migrate --network development"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

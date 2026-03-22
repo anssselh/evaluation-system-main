@@ -36,8 +36,11 @@ interface Certificate {
 
 interface Stage {
   _id: string;
-  title: string;
-  position: string;
+  title?: string;
+  position?: string;
+  studentName: string;
+  university?: string;
+  status: string;
 }
 
 export default function CompanyCertificatesPage() {
@@ -70,14 +73,14 @@ export default function CompanyCertificatesPage() {
         setCertificates(certsData);
       }
 
-      // Fetch stages
+      // Fetch completed stages only (certificates are for finished internships)
       const stagesRes = await fetch('/api/stages', {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       if (stagesRes.ok) {
         const stagesData = await stagesRes.json();
-        setStages(stagesData);
+        setStages(stagesData.filter((s: Stage) => s.status === 'completed'));
       }
     } catch (error) {
       console.error('[v0] Fetch error:', error);
@@ -183,11 +186,22 @@ export default function CompanyCertificatesPage() {
                     <SelectValue placeholder="Select a stage" />
                   </SelectTrigger>
                   <SelectContent>
-                    {stages.map((stage) => (
-                      <SelectItem key={stage._id} value={stage._id}>
-                        {stage.title} - {stage.position}
+                    {stages.length === 0 ? (
+                      <SelectItem value="none" disabled>
+                        No completed internships found
                       </SelectItem>
-                    ))}
+                    ) : (
+                      stages.map((stage) => {
+                        const label = stage.title || stage.position
+                          ? `${stage.title || stage.position}${stage.title && stage.position ? ` (${stage.position})` : ''}`
+                          : `${stage.studentName}'s Internship`;
+                        return (
+                          <SelectItem key={stage._id} value={stage._id}>
+                            {label} — {stage.studentName}
+                          </SelectItem>
+                        );
+                      })
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -233,10 +247,10 @@ export default function CompanyCertificatesPage() {
                 <div className="flex justify-between items-start">
                   <div>
                     <CardTitle className="text-white">
-                      {cert.stageId?.title || 'Certificate'}
+                      {cert.stageId?.title || cert.stageId?.position || `${cert.studentId?.name}'s Certificate`}
                     </CardTitle>
                     <CardDescription className="text-slate-400">
-                      Student: {cert.studentId?.name}
+                      Student: {cert.studentId?.name || 'Unknown'}
                     </CardDescription>
                   </div>
                   <div className="flex flex-col items-end gap-2">
