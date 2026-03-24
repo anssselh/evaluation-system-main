@@ -19,7 +19,6 @@ const StageSchema = new mongoose.Schema({
   endDate: Date,
   status: String,
   studentId: mongoose.Schema.Types.ObjectId,
-  supervisorId: mongoose.Schema.Types.ObjectId,
   createdAt: Date,
 });
 
@@ -61,16 +60,6 @@ async function seed() {
       profileComplete: true,
       createdAt: new Date(),
     });
-
-    const supervisor = await User.create({
-      email: 'supervisor@example.com',
-      password: hashedPassword,
-      name: 'Dr. Marie Martin',
-      role: 'supervisor',
-      profileComplete: true,
-      createdAt: new Date(),
-    });
-
     console.log('[v0] Created test users');
 
     // Create test stages
@@ -85,7 +74,6 @@ async function seed() {
       endDate,
       status: 'active',
       studentId: student._id,
-      supervisorId: supervisor._id,
       createdAt: new Date(),
     });
 
