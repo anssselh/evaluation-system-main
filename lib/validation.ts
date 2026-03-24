@@ -5,7 +5,7 @@ export const RegisterSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
-  role: z.enum(['student', 'company', 'supervisor']),
+  role: z.enum(['student', 'company']),
   phone: z.string().optional(),
   address: z.string().optional(),
   companyName: z.string().optional(),
@@ -32,7 +32,6 @@ export const CreateStageSchema = z.object({
   email: z.string().email('Valid email is required'),
   tasks: z.array(z.string()).optional(),
   achievements: z.array(z.string()).optional(),
-  supervisorId: z.string().optional(),
 });
 
 export const UpdateStageSchema = CreateStageSchema.partial();

@@ -62,12 +62,6 @@ export default function DashboardLayout({
           { label: 'Certificates', href: `/dashboard/${user.role}/certificates` },
         ]
       : []),
-    ...(user.role === 'supervisor'
-      ? [
-          { label: 'Students', href: `/dashboard/${user.role}/students` },
-          { label: 'Reports', href: `/dashboard/${user.role}/reports` },
-        ]
-      : []),
   ];
 
   return (
