@@ -11,7 +11,6 @@ interface Stage {
   endDate: string;
   status: 'active' | 'completed' | 'pending';
   studentId?: string;
-  supervisorId?: string;
   reportsCount?: number;
 }
 

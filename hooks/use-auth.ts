@@ -5,7 +5,7 @@ interface User {
   id: string;
   email: string;
   name: string;
-  role: 'student' | 'company' | 'supervisor';
+  role: 'student' | 'company';
   profileComplete: boolean;
 }
 
@@ -13,7 +13,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name: string, role: 'student' | 'company' | 'supervisor') => Promise<void>;
+  register: (email: string, password: string, name: string, role: 'student' | 'company') => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
 }
@@ -79,7 +79,7 @@ export function useAuth(): AuthContextType {
     }
   };
 
-  const register = async (email: string, password: string, name: string, role: 'student' | 'company' | 'supervisor') => {
+  const register = async (email: string, password: string, name: string, role: 'student' | 'company') => {
     try {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
